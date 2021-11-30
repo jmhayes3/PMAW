@@ -4,12 +4,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# for use when no new data is returned
+# for use when no new data is returned or when >=500 HTTP status code returned
 class ExponentialCounter:
     """A class to provide an exponential counter with jitter."""
 
     def __init__(self, max_counter):
-        # The computed value may be 3.125% higher due to jitter.
+        """The computed value may be 3.125% higher due to jitter."""
 
         self._base = 1
         self._max = max_counter
@@ -30,11 +30,10 @@ class RateLimiter:
 
     def __init__(self):
         self.remaining = None
-        self.next_request_timestamp = None
+        self.limit = None
         self.reset_timestamp = None
-        self.limit_per_min = None
-        self.limit_per_day = None
-        self.rate = None
+        self.next_request_timestamp = None
+        self.wait = 1
 
     def call(self, request_function, *args, **kwargs):
         self.delay()
@@ -43,38 +42,24 @@ class RateLimiter:
         return response
 
     def delay(self):
-        if self.next_request_timestamp is None:
-            return
-
-        _wait = self.next_request_timestamp - time.time()
-        if _wait <= 0:
-            return
-
-        logger.info(f"Sleeping {_wait} seconds prior to call")
-        time.sleep(_wait)
+        if self.next_request_timestamp is not None:
+            _wait = self.next_request_timestamp - time.time()
+            if _wait <= 0:
+                return
+            else:
+                logger.debug(f"Sleeping {_wait} seconds prior to call")
+                time.sleep(_wait)
 
     def update(self, response_headers):
-        if "x-ratelimit-remaining" not in response_headers:
-            if self.remaining is not None:
-                self.remaining -= 1
-            return
-
-        now = time.time()
-
-        seconds_to_reset = int(response_headers["x-ratelimit-reset"])
         self.remaining = int(response_headers["x-ratelimit-remaining"])
-        self.reset_timestamp = seconds_to_reset
         self.limit = int(response_headers["x-ratelimit-limit"])
+        self.reset_timestamp = int(response_headers["x-ratelimit-reset"])
 
-        logger.info(f"Remaining: {self.remaining}")
-        logger.info(f"Reset timestamp: {self.reset_timestamp}")
-        logger.info(f"Limit: {self.limit}")
+        logger.debug(f"Remaining: {self.remaining}")
+        logger.debug(f"Limit: {self.limit}")
+        logger.debug(f"Ratelimit reset: {self.reset_timestamp}")
 
         if self.remaining <= 0:
             self.next_request_timestamp = self.reset_timestamp
-            return
-
-        self.next_request_timestamp = min(
-            self.reset_timestamp,
-            now + max(min(seconds_to_reset - self.remaining, 1), 0)
-        )
+        else:
+            self.next_request_timestamp = min(self.reset_timestamp, time.time() + self.wait)

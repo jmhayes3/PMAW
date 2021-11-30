@@ -1,4 +1,8 @@
 import logging
+import traceback
+import time
+
+from datetime import datetime, timezone
 
 from copy import deepcopy
 from contextlib import contextmanager
@@ -35,25 +39,25 @@ class Session:
     def __exit_(self, *_args):
         self._close()
 
+    @staticmethod
+    def _log_request(method, url, params):
+        logger.debug(f"Request: {method} {url}; Params: {params}")
+
     def _request_with_retries(self, method, url, params, tries=3):
         response = self.rate_limiter.call(self.request_handler.request, method, url, params)
-        logger.debug(
-            f"Response: {response.status_code}"
-            f" ({response.headers.get('content-length')} bytes)"
-        )
+        self._log_request(method, url, params)
 
-        if response.status_code in self.RETRY_CODES:
-            if tries > 0:
-                logger.debug(f"{tries} tries remaining. Retrying request.")
-                self._request_with_retries(method, url, params, tries=tries-1)
-        elif response.status_code == codes.ok:
+        if response.status_code == codes.ok:
             return response
+        elif response.status_code in self.RETRY_CODES:
+            if tries > 0:
+                # use exponential backoff here
+                logger.debug(f"Received {response.status_code} response. Retrying.")
+                self._request_with_retries(method, url, params, tries=tries-1)
         elif response.status_code == codes.too_many_requests:
             raise TooManyRequests(response)
         else:
             raise ResponseException(response)
-
-        return response
 
     def request(self, method, path, params=None):
         params = deepcopy(params) or {}
