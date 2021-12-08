@@ -1,10 +1,14 @@
 import os
+import sys
 import logging
-import time
+import traceback
 
-from datetime import datetime, timezone
-
-from pmaw import setup_logging, Authenticator, RequestHandler, Session, API_PATH, TooManyRequests, ResponseException
+from pmaw.auth import Authenticator
+from pmaw.request_handler import RequestHandler
+from pmaw.session import Session
+from pmaw.exceptions import TooManyRequests, ResponseException
+from pmaw.util import setup_logging
+from pmaw.messari import Messari
 
 
 def main(debug=False):
@@ -21,20 +25,41 @@ def main(debug=False):
         os.environ["X_MESSARI_API_KEY"],
     )
     request_handler = RequestHandler(auth=auth)
-    # request_handler = RequestHandler(auth=None)
-
     session = Session(request_handler)
+    messari = Messari(session=session)
 
-    while True:
-        try:
-            response = session.request(
-                "GET",
-                API_PATH.get("assets"),
+    try:
+        asset = messari.asset(id="ethereum")
+        print(asset)
+        print(vars(asset))
+        print(asset.symbol)
+        print(asset)
+        for i in asset.contract_addresses:
+            print(i)
+        for i in vars(asset):
+            print(i)
+        # metrics = asset.metrics
+        # s = metrics.market_data
+        # print(s)
+        # for i in vars(metrics):
+        #     print(i)
+        p = asset.profile
+        # print(p)
+        g = p.general
+        for i in vars(p):
+            print(i)
+
+        print(g.keys())
+    except TooManyRequests as e:
+        logger.warning(e)
+    except ResponseException as e:
+        logger.error(e)
+    except:
+        logger.critical("Uncaught exception: {}".format(
+                traceback.format_exc()
             )
-        except TooManyRequests as e:
-            logger.info(e)
-        except ResponseException as e:
-            logger.error(e)
+        )
+        sys.exit(-1)
 
 
 if __name__ == "__main__":

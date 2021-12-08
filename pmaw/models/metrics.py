@@ -1,12 +1,10 @@
 from .base import MessariBase
-from .metrics import Metrics
-from .profile import Profile
 
 
-class Asset(MessariBase):
+class Metrics(MessariBase):
 
     STR_FIELD = "id"
-    PATH = "api/v1/assets/{asset}"
+    PATH = "api/v1/assets/{asset}/metrics"
 
     def __init__(self, messari, id=None, _data=None):
         if (id, _data).count(None) != 1:
@@ -28,21 +26,9 @@ class Asset(MessariBase):
 
     def _fetch(self):
         data = self._fetch_data()
-        asset_data = data.json()["data"]
-        asset = type(self)(self._messari, _data=asset_data)
+        metrics_data = data.json()["data"]
+        metrics = type(self)(self._messari, _data=metrics_data)
 
-        self.__dict__.update(asset.__dict__)
+        self.__dict__.update(metrics.__dict__)
 
         self._fetched = True
-
-    @property
-    def metrics(self):
-        return Metrics(self._messari, id=self.id)
-
-    @property
-    def profile(self):
-        return Profile(self._messari, id=self.id)
-
-    @property
-    def news(self):
-        return None

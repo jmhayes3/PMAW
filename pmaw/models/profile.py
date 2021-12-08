@@ -1,12 +1,11 @@
 from .base import MessariBase
-from .metrics import Metrics
-from .profile import Profile
+from ..util import flatten
 
 
-class Asset(MessariBase):
+class Profile(MessariBase):
 
     STR_FIELD = "id"
-    PATH = "api/v1/assets/{asset}"
+    PATH = "api/v2/assets/{asset}/profile"
 
     def __init__(self, messari, id=None, _data=None):
         if (id, _data).count(None) != 1:
@@ -18,9 +17,15 @@ class Asset(MessariBase):
         super().__init__(messari, _data=_data)
 
         self._path = self.PATH.format(asset=self)
-        self._params = {}
+        self._params = {
+            "as-markdown": "",
+        }
+        # self._params = {}
 
     def __setattr__(self, attribute, value):
+        # if attribute == "general":
+        #     value = General()
+
         super().__setattr__(attribute, value)
 
     def _fetch_data(self):
@@ -28,21 +33,14 @@ class Asset(MessariBase):
 
     def _fetch(self):
         data = self._fetch_data()
-        asset_data = data.json()["data"]
-        asset = type(self)(self._messari, _data=asset_data)
+        profile_data = data.json()["data"]
+        profile = type(self)(self._messari, _data=profile_data)
 
-        self.__dict__.update(asset.__dict__)
+        self.__dict__.update(profile.__dict__)
+
+        for attribute, value in profile.profile.items():
+            setattr(self, attribute, value)
+
+        delattr(self, "profile")
 
         self._fetched = True
-
-    @property
-    def metrics(self):
-        return Metrics(self._messari, id=self.id)
-
-    @property
-    def profile(self):
-        return Profile(self._messari, id=self.id)
-
-    @property
-    def news(self):
-        return None

@@ -4,28 +4,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# for use when no new data is returned or when >=500 HTTP status code returned
-class ExponentialCounter:
-    """A class to provide an exponential counter with jitter."""
-
-    def __init__(self, max_counter):
-        """The computed value may be 3.125% higher due to jitter."""
-
-        self._base = 1
-        self._max = max_counter
-
-    def counter(self):
-        """Increment the counter and return the current value with jitter."""
-        max_jitter = self._base / 16.0
-        value = self._base + random.random() * max_jitter - max_jitter / 2
-        self._base = min(self._base * 2, self._max)
-        return value
-
-    def reset(self):
-        """Reset the counter to 1."""
-        self._base = 1
-
-
 class RateLimiter:
 
     def __init__(self):
