@@ -7,6 +7,10 @@ from requests import codes
 
 from .exceptions import (
     ResponseException,
+    BadRequest,
+    Unauthorized,
+    Forbidden,
+    NotFound,
     TooManyRequests,
 )
 from .const import API_PREFIX
@@ -41,14 +45,23 @@ class Session:
 
     def _request_with_retries(self, method, url, params, retries=3):
         response = self.rate_limiter.call(self.request_handler.request, method, url, params)
+
         self._log_request(method, url, params)
 
-        if response.status_code == codes.ok:
-            return response
-        elif response.status_code in self.RETRY_CODES:
+        if response.status_code in self.RETRY_CODES:
             if retries > 0:
                 logger.debug(f"Received {response.status_code} response. Retrying.")
                 self._request_with_retries(method, url, params, retries=retries-1)
+        elif response.status_code == codes.ok:
+            return response
+        elif response.status_code == codes.bad_request:
+            raise BadRequest(response)
+        elif response.status_code == codes.unauthorized:
+            raise Unauthorized(response)
+        elif response.status_code == codes.forbidden:
+            raise Forbidden(response)
+        elif response.status_code == codes.not_found:
+            raise NotFound(response)
         elif response.status_code == codes.too_many_requests:
             raise TooManyRequests(response)
         else:

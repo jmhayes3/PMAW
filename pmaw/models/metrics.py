@@ -1,9 +1,8 @@
-from .base import MessariBase
+from .base import PMAWBase
 
 
-class Metrics(MessariBase):
+class Metrics(PMAWBase):
 
-    STR_FIELD = "id"
     PATH = "api/v1/assets/{asset}/metrics"
 
     def __init__(self, messari, id=None, _data=None):

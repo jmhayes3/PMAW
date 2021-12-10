@@ -16,6 +16,10 @@ class PMAWBase:
         value.update(new_arguments)
         argument_dict[key] = value
 
+    @classmethod
+    def parse(cls, messari, data):
+        return cls(messari, _data=data)
+
 
 class MessariBase(PMAWBase):
 

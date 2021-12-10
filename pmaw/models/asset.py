@@ -21,6 +21,11 @@ class Asset(MessariBase):
         self._params = {}
 
     def __setattr__(self, attribute, value):
+        if attribute == "metrics":
+            value = Metrics(self._messari, _data=value)
+        elif attribute == "profile":
+            value = Profile(self._messari, _data=value)
+
         super().__setattr__(attribute, value)
 
     def _fetch_data(self):
@@ -35,14 +40,8 @@ class Asset(MessariBase):
 
         self._fetched = True
 
-    @property
     def metrics(self):
         return Metrics(self._messari, id=self.id)
 
-    @property
     def profile(self):
         return Profile(self._messari, id=self.id)
-
-    @property
-    def news(self):
-        return None

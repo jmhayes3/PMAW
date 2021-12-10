@@ -1,10 +1,9 @@
-from .base import MessariBase
+from .base import PMAWBase
 from ..util import flatten
 
 
-class Profile(MessariBase):
+class Profile(PMAWBase):
 
-    STR_FIELD = "id"
     PATH = "api/v2/assets/{asset}/profile"
 
     def __init__(self, messari, id=None, _data=None):
