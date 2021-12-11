@@ -1,6 +1,7 @@
 from .models.asset import Asset
 from .models.assets import Assets
 from .session import Session
+from .parser import Parser
 
 
 class Messari:
@@ -10,6 +11,8 @@ class Messari:
 
         if self._session is None:
             self._initialize_session()
+
+        self.parser = Parser(self)
 
         self.assets = Assets(self)
 

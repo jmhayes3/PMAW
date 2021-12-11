@@ -17,7 +17,7 @@ class PMAWBase:
         argument_dict[key] = value
 
     @classmethod
-    def parse(cls, messari, data):
+    def from_data(cls, messari, data):
         return cls(messari, _data=data)
 
 
@@ -56,9 +56,3 @@ class MessariBase(PMAWBase):
 
     def __hash__(self):
         return hash(self.__class__.__name__) ^ hash(str(self).lower())
-
-    def __str__(self):
-        return getattr(self, self.STR_FIELD)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.STR_FIELD}={str(self)!r})"
