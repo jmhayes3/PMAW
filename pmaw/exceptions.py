@@ -1,8 +1,8 @@
-class PmawException(Exception):
+class PMAWException(Exception):
     """Base exception class."""
 
 
-class RequestException(PmawException):
+class RequestException(PMAWException):
     """An exception occurred while handling the request."""
 
     def __init__(self, original_exception, request_args, request_kwargs):
@@ -15,7 +15,7 @@ class RequestException(PmawException):
         )
 
 
-class ResponseException(PmawException):
+class ResponseException(PMAWException):
     """An exception occurred after the request was completed."""
 
     def __init__(self, response):
@@ -53,4 +53,4 @@ class TooManyRequests(ResponseException):
         if self.retry_after:
             _wait = float(self.retry_after)
             msg += f" Wait {_wait} seconds before retrying this request."
-        PmawException.__init__(self, msg)
+        PMAWException.__init__(self, msg)

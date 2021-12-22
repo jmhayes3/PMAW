@@ -1,6 +1,9 @@
-from .models.asset import Asset
+from .models.news import NewsItem
+from .models.profile import General
 from .models.metrics import MarketData
-from .util import flatten
+from .models.market import Market
+
+from .models import asset
 
 
 class Parser:
@@ -10,11 +13,19 @@ class Parser:
 
     def from_dict(self, data):
         if {"id", "slug", "symbol", "name"}.issubset(data):
-           return Asset.from_data(self._messari, data)
+            return asset.Asset.from_data(self._messari, data)
+
+        if {"id", "exchange_slug", "pair"}.issubset(data):
+            return Market.from_data(self._messari, data)
+
+        if {"id", "title", "content", "author"}.issubset(data):
+            return NewsItem.from_data(self._messari, data)
 
         if {"price_usd"}.issubset(data):
-            data = flatten(data)
             return MarketData.from_data(self._messari, data)
+
+        if {"overview", "roadmap", "background", "regulation"}.issubset(data):
+            return General.from_data(self._messari, data)
 
     def parse(self, data):
         if data is None:

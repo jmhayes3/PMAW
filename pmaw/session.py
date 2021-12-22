@@ -1,5 +1,3 @@
-import logging
-
 from copy import deepcopy
 from urllib.parse import urljoin
 
@@ -17,7 +15,7 @@ from .const import API_PREFIX
 from .rate_limiter import RateLimiter
 from .request_handler import RequestHandler
 
-logger = logging.getLogger("pmaw")
+from pmaw import log as logger
 
 
 class Session:
@@ -41,7 +39,7 @@ class Session:
 
     @staticmethod
     def _log_request(method, url, params):
-        logger.debug(f"Request: {method} {url}; Params: {params}")
+        logger.info(f"Request: {method} {url}; Params: {params}")
 
     def _request_with_retries(self, method, url, params, retries=3):
         response = self.rate_limiter.call(self.request_handler.request, method, url, params)

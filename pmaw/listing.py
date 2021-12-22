@@ -10,7 +10,7 @@ from .parser import Parser
 
 class ListingGenerator(PMAWBase):
 
-    def __init__(self, messari, path, limit=20, params=None):
+    def __init__(self, messari, path, limit=500, params=None):
         super().__init__(messari, _data=None)
 
         self._exhausted = False
@@ -66,6 +66,17 @@ class ListingGenerator(PMAWBase):
 
 
 class AssetListingMixin(PMAWBase):
+    """
+    page    integer Page number, starts at 1. Increment to paginate through
+            results (until result is empty array)
+    sort    string default sort is "marketcap desc", but the only valid value
+            for this query param is "id" which translates to "id asc", which is
+            useful for a stable sort while paginating
+    limit    integer default is 20, max is 500
+    fields    string pare down the returned fields (comma , separated, drill down with a slash /)
+    with-metrics    any existence of this query param filters assets to those with quantitative data
+    with-profiles    any existence of this query param filters assets to those with qualitative data
+    """
 
     def __init__(self, messari, _data=None):
         super().__init__(messari, _data=_data)
@@ -82,10 +93,10 @@ class AssetListingMixin(PMAWBase):
         return ListingGenerator(self._messari, path, **generator_kwargs)
 
 
-class NewsListingMixin:
+class NewsListingMixin(PMAWBase):
 
     def __init__(self, messari, _data=None):
         super().__init__(messari, _data=_data)
 
-    def news(self):
-        return []
+    def news(self, **generator_kwargs):
+        return ListingGenerator(self._messari, API_PATH["asset_news"].format(asset=self.id), **generator_kwargs)

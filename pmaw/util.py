@@ -1,5 +1,3 @@
-import sys
-import logging
 import time
 import random
 
@@ -65,32 +63,6 @@ class ExponentialCounter:
     def reset(self):
         """Reset the counter to 1."""
         self._base = 1
-
-
-def setup_logging(log_level=logging.INFO):
-    log_format = logging.Formatter(
-        (
-            "%(asctime)s [%(levelname)s]"
-            " -- [%(name)s:%(module)s/%(funcName)s]"
-            " -- %(message)s"
-        ),
-        datefmt="%H:%M:%S"
-    )
-
-    null_handler = logging.NullHandler()
-    logging.basicConfig(
-        level=log_level,
-        handlers=[null_handler]
-    )
-
-    # Set handler for logging to console.
-    # console_handler = logging.StreamHandler()  # Log to stderr.
-    console_handler = logging.StreamHandler(sys.__stdout__)  # Log to stdout.
-    console_handler.setLevel(log_level)
-    console_handler.setFormatter(log_format)
-
-    logger = logging.getLogger()
-    logger.addHandler(console_handler)
 
 
 def stream_generator(function, pause_after=None, skip_existing=False, exclude_before=False, **function_kwargs):
