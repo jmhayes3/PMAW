@@ -18,7 +18,7 @@ class Metrics(MessariBase):
 
     def __setattr__(self, attribute, value):
         if attribute == "market_data":
-            value = self._messari.parser.parse(value)
+            value = MarketData.from_data(self._messari, value)
         elif attribute == "supply":
             value = Supply.from_data(self._messari, value)
         elif attribute == "blockchain_stats_24_hours":

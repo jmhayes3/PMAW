@@ -20,7 +20,7 @@ class Profile(MessariBase):
 
     def __setattr__(self, attribute, value):
         if attribute == "general":
-            value = self._messari.parser.parse(value)
+            value = General.from_data(self._messari, value)
         elif attribute == "contributors":
             value = Contributors.from_data(self._messari, value)
         elif attribute == "advisors":

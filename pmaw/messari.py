@@ -15,7 +15,7 @@ class Messari:
 
     def __init__(self, session=None, max_wait=60):
         self._session = session
-        self.max_wait = max_wait
+        self._max_wait = max_wait
 
         if self._session is None:
             self._initialize_session()
@@ -36,7 +36,7 @@ class Messari:
                 logger.warning(exception)
                 if exception.retry_after:
                     wait = float(exception.retry_after) + 1
-                    if wait > self.max_wait:
+                    if wait > self._max_wait:
                         logger.info("Max wait exceeded")
                         continue
                     else:

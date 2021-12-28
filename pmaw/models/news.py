@@ -1,8 +1,16 @@
 from .base import PMAWBase
+from ..endpoints import API_PATH
+from ..listing import ListingGenerator
 
 
 class News(PMAWBase):
-    """News."""
+    """News helper."""
+
+    def __init__(self, messari, _data=None):
+        super().__init__(messari, _data=_data)
+
+    def news(self, **generator_kwargs):
+        return ListingGenerator(self._messari, API_PATH["asset_news"].format(asset=self.id), **generator_kwargs)
 
 
 class NewsItem(PMAWBase):

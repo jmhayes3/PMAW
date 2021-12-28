@@ -1,11 +1,11 @@
 from .base import MessariBase
 from .metrics import Metrics
 from .profile import Profile
+from .news import News
 from ..endpoints import API_PATH
-from ..listing import NewsListingMixin
 
 
-class Asset(NewsListingMixin, MessariBase):
+class Asset(MessariBase):
 
     def __init__(self, messari, id=None, _data=None):
         if (id, _data).count(None) != 1:
