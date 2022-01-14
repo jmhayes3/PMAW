@@ -5,16 +5,10 @@ from ..endpoints import API_PATH
 class Metrics(MessariBase):
     """Asset metrics."""
 
-    def __init__(self, messari, id=None, _data=None, _fetched=False):
-        if (id, _data).count(None) != 1:
-            raise TypeError("Either `id` or `_data` required.")
+    def __init__(self, asset, _data=None):
+        super().__init__(asset._messari, _data=_data)
 
-        if id:
-            self.id = id
-        elif _data:
-            _fetched = True
-
-        super().__init__(messari, _data=_data, _fetched=_fetched)
+        self.asset = asset
 
     def __setattr__(self, attribute, value):
         if attribute == "market_data":
@@ -34,14 +28,13 @@ class Metrics(MessariBase):
         super().__setattr__(attribute, value)
 
     def _fetch_data(self):
-        path = API_PATH["asset_metrics"].format(asset=self.id)
+        path = API_PATH["asset_metrics"].format(asset=self.asset.id)
         params = {}
         return self._messari.request("GET", path, params)
 
     def _fetch(self):
-        data = self._fetch_data()
-        metrics_data = data.json()["data"]
-        metrics = type(self)(self._messari, _data=metrics_data)
+        data = self._fetch_data().json()["data"]
+        metrics = type(self)(self.asset, _data=data)
 
         self.__dict__.update(metrics.__dict__)
 

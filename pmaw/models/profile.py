@@ -7,16 +7,10 @@ from . import asset
 class Profile(MessariBase):
     """Asset profile."""
 
-    def __init__(self, messari, id=None, _data=None, _fetched=False):
-        if (id, _data).count(None) != 1:
-            raise TypeError("Either `id` or `_data` required.")
+    def __init__(self, asset, _data=None):
+        super().__init__(asset._messari, _data=_data)
 
-        if id:
-            self.id = id
-        elif _data:
-            _fetched = True
-
-        super().__init__(messari, _data=_data, _fetched=_fetched)
+        self.asset = asset
 
     def __setattr__(self, attribute, value):
         if attribute == "general":
@@ -38,7 +32,7 @@ class Profile(MessariBase):
         super().__setattr__(attribute, value)
 
     def _fetch_data(self):
-        path = API_PATH["asset_profile"].format(asset=self.id)
+        path = API_PATH["asset_profile"].format(asset=self.asset.id)
         params = {}
         # params = {
         #     "as-markdown": "",
@@ -46,10 +40,10 @@ class Profile(MessariBase):
         return self._messari.request("GET", path, params)
 
     def _fetch(self):
-        data = self._fetch_data()
-        profile_data = data.json()["data"]
-        profile = type(self)(self._messari, _data=profile_data)
+        data = self._fetch_data().json()["data"]
+        profile = type(self)(self.asset, _data=data)
 
+        # profile data is double nested
         for attribute, value in profile.profile.items():
             setattr(self, attribute, value)
 
@@ -133,13 +127,15 @@ class Investors(PMAWBase):
 class Ecosystem(PMAWBase):
     """Profile ecosystem."""
 
+    # The asset id returned by the api here is not the same as the asset
+    # id returned by the assets/asset endpoint.
     @classmethod
     def from_data(cls, messari, data):
         if "assets" in data and isinstance(data["assets"], list):
             assets = []
             for item in data["assets"]:
                 assets.append(
-                    asset.Asset(messari, id=item.get("name"))
+                    asset.Asset(messari, id=item["id"])
                 )
             data["assets"] = assets
         return cls(messari, _data=data)

@@ -35,4 +35,3 @@ class Assets(PMAWBase):
     def supported_metrics(self):
         path = API_PATH["assets_supported_metrics"]
         return self._messari.request("GET", path).json()["data"]["metrics"]
-

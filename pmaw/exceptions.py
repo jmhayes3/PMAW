@@ -51,6 +51,6 @@ class TooManyRequests(ResponseException):
 
         msg = "Too many requests."
         if self.retry_after:
-            _wait = float(self.retry_after)
-            msg += f" Wait {_wait} seconds before retrying this request."
+            t = float(self.retry_after)
+            msg += f" Wait at least {t} seconds before retrying this request."
         PMAWException.__init__(self, msg)
