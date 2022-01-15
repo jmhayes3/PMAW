@@ -2,6 +2,7 @@ import time
 
 from .models.asset import Asset
 from .models.assets import Assets
+from .models.market import Market
 from .session import Session
 from .parser import Parser
 from .endpoints import API_PATH
@@ -48,8 +49,11 @@ class Messari:
     def asset(self, id=None):
         return Asset(self, id=id)
 
-    def news(self, **generator_kwargs):
-        return ListingGenerator(self, API_PATH["news"], **generator_kwargs)
-
     def markets(self, **generator_kwargs):
         return ListingGenerator(self, API_PATH["markets"], **generator_kwargs)
+
+    def market(self, id=None):
+        return Market(self, id=id)
+
+    def news(self, **generator_kwargs):
+        return ListingGenerator(self, API_PATH["news"], **generator_kwargs)

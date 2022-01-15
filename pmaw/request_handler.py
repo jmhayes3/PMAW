@@ -16,6 +16,6 @@ class RequestHandler:
 
     def request(self, *args, **kwargs):
         try:
-            return self._session.request(*args, **kwargs)
+            return self._session.request(*args, **kwargs, timeout=(5, 27))
         except Exception as e:
             raise RequestException(e, args, kwargs)

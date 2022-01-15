@@ -1,33 +1,14 @@
-import time
-
 from copy import deepcopy
-from urllib.parse import urljoin
 from datetime import datetime, timedelta
 
 from .models.base import PMAWBase
 from .endpoints import API_PATH
-from .exceptions import NotFound
 
 from . import log as logger
 
 
-class MarketTimeseries(PMAWBase):
-    """Market time series helper."""
-
-    def __init__(self, market):
-        super().__init__(market._messari, _data=None)
-
-        self.market = market
-
-    def __call__(self, metric_id, **generator_kwargs):
-        return TimeseriesGenerator(
-            self._messari,
-            API_PATH["market_metric_time_series"].format(
-                asset=self.market.id,
-                metric_id=metric_id
-            ),
-            **generator_kwargs
-        )
+def format_timestamp(timestamp):
+    return timestamp.rstrip("Z")
 
 
 class AssetTimeseries(PMAWBase):
@@ -38,24 +19,21 @@ class AssetTimeseries(PMAWBase):
 
         self.asset = asset
 
-    def __call__(self, metric_id, start, end, interval="1d", **generator_kwargs):
-        return TimeseriesGenerator(
-            self._messari,
-            API_PATH["asset_metric_time_series"].format(
-                asset=self.asset.id,
-                metric_id=metric_id
-            ),
-            start,
-            end,
-            interval,
-            **generator_kwargs
+    def __call__(self, metric, start, end, interval="1d", limit=None):
+        path = API_PATH["asset_metric_time_series"].format(
+            asset=self.asset.id,
+            metric=metric
         )
+        params = dict(start=start, end=end, interval=interval)
+        return TimeseriesGenerator(self._messari, path, params, limit)
 
 
 class TimeseriesGenerator(PMAWBase):
     """Time series generator."""
 
-    INTERVALS = {
+    MAX_BATCH_SIZE = 2016
+
+    VALID_INTERVALS = {
         "1m": 60,
         "5m": 300,
         "15m": 900,
@@ -65,66 +43,66 @@ class TimeseriesGenerator(PMAWBase):
         "1w": 604800,
     }
 
-    def get_offset(self, start, end, interval="1d", max_points=2016):
-        if not all((start, end)):
+    @property
+    def interval_seconds(self):
+        return self.VALID_INTERVALS[self.interval]
+
+    @property
+    def max_interval_seconds(self):
+        return self.interval_seconds * self.MAX_BATCH_SIZE
+
+    def get_batch_interval(self, start, end, offset=False):
+        if (start, end).count(None) != 0:
             raise ValueError("Both `start` and `end` are required.")
-        elif interval not in self.INTERVALS:
-            raise ValueError("Invalid interval.")
 
-        if isinstance(start, str):
-            start = datetime.fromisoformat(start)
-        elif isinstance(end, str):
-            end = datetime.fromisoformat(end)
+        start = datetime.fromisoformat(start)
+        end = datetime.fromisoformat(end)
 
-        start_dt = start
-        logger.info(f"Start datetime: {start_dt}")
+        logger.info(f"Start: {start}")
+        logger.info(f"End: {end}")
 
-        end_dt = end
-        logger.info(f"End datetime: {end_dt}")
+        # add `interval` to start if not first batch since `end` is inclusive
+        if offset:
+            start = start + timedelta(seconds=self.interval_seconds)
+            logger.info(f"Start w/ offset: {start}")
 
-        if start_dt == end_dt:
-            return None
+        batch_end = start + timedelta(seconds=self.max_interval_seconds)
+        end = min(batch_end, end)
 
-        time_delta = end_dt - start_dt
-        logger.info(f"Timedelta: {time_delta}")
-        if time_delta.days < 0:
-            return None
+        logger.info(f"Batch start: {start}")
+        logger.info(f"Batch end: {end}")
 
-        interval_offset = self.INTERVALS[interval] * max_points
-        logger.info(f"Interval offset: {interval_offset}")
+        return start, end
 
-        next_dt = start_dt + timedelta(seconds=interval_offset)
-        logger.info(f"Next datetime: {next_dt}")
+    def fetch_batch(self):
+        response = self._messari.request("GET", self.path, self.params)
+        return response.json()["data"]["values"]
 
-        next_dt = min(next_dt, end_dt)
-
-        return next_dt.isoformat()
-
-    def __init__(self, messari, path, start, end, interval="1d", limit=2016, params=None):
+    def __init__(self, messari, path, params, limit=None):
         super().__init__(messari, _data=None)
 
-        self._batch = None
-        self._batch_index = None
-        self._batch_size = 2016
-
-        self.path = path
-        self.start = datetime.fromisoformat(start)
-        self.end = datetime.fromisoformat(end)
-        self.interval = interval
-        self.limit = limit
-        self.timestamp_format = "rfc3339"
-
-        self.params = deepcopy(params) if params else {}
-
-        self.params["timestamp-format"] = self.timestamp_format
-        self.params["interval"] = self.interval
-
-        self.params["start"] = self.start.isoformat()
-        self.params["end"] = self.get_offset(self.start, self.end)
-
+        self.batch = None
+        self.batch_index = None
+        self.batch_num = 0
+        self.yielded = 0
         self.exhausted = False
 
-        self.yielded = 0
+        self.path = path
+        self.params = deepcopy(params)
+        self.limit = limit
+
+        self.start = self.params["start"]
+        self.end = self.params["end"]
+        self.interval = self.params["interval"]
+
+        if self.interval not in self.VALID_INTERVALS:
+            raise ValueError("Invalid interval.")
+
+        self.params["timestamp-format"] = "rfc3339"
+
+        start, end = self.get_batch_interval(self.start, self.end)
+        self.params["start"] = start.isoformat()
+        self.params["end"] = end.isoformat()
 
     def __iter__(self):
         return self
@@ -133,30 +111,33 @@ class TimeseriesGenerator(PMAWBase):
         if self.limit is not None and self.yielded >= self.limit:
             raise StopIteration
 
-        if self._batch is None or self._batch_index >= len(self._batch):
+        if self.batch is None or self.batch_index >= len(self.batch):
             if self.exhausted:
                 raise StopIteration
 
-            response = self._messari.request("GET", self.path, self.params)
-            self._batch = response.json()["data"]["values"]
-            if not self._batch or not isinstance(self._batch, list):
+            self.batch = self.fetch_batch()
+            if not self.batch or not isinstance(self.batch, list):
                 raise StopIteration
 
-            # datetimes are inclusive so add `interval` seconds to start date
-            self.params["start"] = self.params["end"]
-            start = datetime.fromisoformat(self.params["start"])
-            delta = timedelta(seconds=self.INTERVALS[self.interval])
-            self.params["start"] = (start + delta).isoformat()
-
-            offset = self.get_offset(self.params["start"], self.end)
-            if offset is None:
+            start, end = self.get_batch_interval(
+                self.params["end"],
+                self.end,
+                offset=True
+            )
+            if start >= end:
                 self.exhausted = True
-            else:
-                self.params["end"] = offset
 
-            self._batch_index = 0
+            self.params["start"] = start.isoformat()
+            self.params["end"] = end.isoformat()
 
-        self._batch_index += 1
+            end_timestamp = format_timestamp(self.batch[-1][0])
+            if end_timestamp == self.params["end"]:
+                self.exhausted = True
+
+            self.batch_num += 1
+            self.batch_index = 0
+
+        self.batch_index += 1
         self.yielded += 1
 
-        return self._batch[self._batch_index - 1]
+        return self.batch[self.batch_index - 1]

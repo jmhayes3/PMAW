@@ -1,8 +1,6 @@
 from copy import deepcopy
-from urllib.parse import urljoin
 
 from .models.base import PMAWBase
-from .endpoints import API_PATH
 from .exceptions import NotFound
 
 

@@ -1,5 +1,4 @@
 import time
-import logging
 
 from pmaw import log as logger
 

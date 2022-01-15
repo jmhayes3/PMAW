@@ -17,10 +17,9 @@ class Asset(MessariBase):
 
         super().__init__(messari, _data=_data, _fetched=_fetched)
 
-        self.news = News(self)
         self.metrics = Metrics(self, None)
         self.profile = Profile(self, None)
-
+        self.news = News(self)
         self.timeseries = AssetTimeseries(self)
 
     def __setattr__(self, attribute, value):
