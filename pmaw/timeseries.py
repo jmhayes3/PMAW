@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from .models.base import PMAWBase
 from .endpoints import API_PATH
 
-from . import log as logger
-
 
 def format_timestamp(timestamp):
     return timestamp.rstrip("Z")
@@ -58,19 +56,19 @@ class TimeseriesGenerator(PMAWBase):
         start = datetime.fromisoformat(start)
         end = datetime.fromisoformat(end)
 
-        logger.info(f"Start: {start}")
-        logger.info(f"End: {end}")
+        print(f"Start: {start}")
+        print(f"End: {end}")
 
         # add `interval` to start if not first batch since `end` is inclusive
         if offset:
             start = start + timedelta(seconds=self.interval_seconds)
-            logger.info(f"Start w/ offset: {start}")
+            print(f"Start w/ offset: {start}")
 
         batch_end = start + timedelta(seconds=self.max_interval_seconds)
         end = min(batch_end, end)
 
-        logger.info(f"Batch start: {start}")
-        logger.info(f"Batch end: {end}")
+        print(f"Batch start: {start}")
+        print(f"Batch end: {end}")
 
         return start, end
 

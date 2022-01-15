@@ -1,7 +1,5 @@
 import time
 
-from pmaw import log as logger
-
 
 class RateLimiter:
 
@@ -24,17 +22,12 @@ class RateLimiter:
             if _wait <= 0:
                 return
             else:
-                logger.debug(f"Sleeping {_wait} seconds prior to call")
                 time.sleep(_wait)
 
     def update(self, response_headers):
         self.remaining = int(response_headers["x-ratelimit-remaining"])
         self.limit = int(response_headers["x-ratelimit-limit"])
         self.reset_timestamp = int(response_headers["x-ratelimit-reset"])
-
-        logger.debug(f"Remaining: {self.remaining}")
-        logger.debug(f"Limit: {self.limit}")
-        logger.debug(f"Ratelimit reset: {self.reset_timestamp}")
 
         if self.remaining <= 0:
             self.next_request_timestamp = self.reset_timestamp

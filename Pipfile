@@ -9,6 +9,7 @@ requests = "*"
 [dev-packages]
 pytest = "*"
 flake8 = "*"
+responses = "*"
 
 [requires]
 python_version = "3.9"

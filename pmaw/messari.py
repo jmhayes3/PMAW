@@ -9,8 +9,6 @@ from .endpoints import API_PATH
 from .listing import ListingGenerator
 from .exceptions import TooManyRequests
 
-from . import log as logger
-
 
 class Messari:
 
@@ -34,14 +32,11 @@ class Messari:
             try:
                 return self._session.request(method, path, params)
             except TooManyRequests as exception:
-                logger.warning(exception)
                 if exception.retry_after:
                     wait = float(exception.retry_after) + 1
                     if wait > self._max_wait:
-                        logger.info("Max wait exceeded")
                         continue
                     else:
-                        logger.info(f"Sleeping {wait} seconds")
                         time.sleep(wait)
             finally:
                 tries -= 1

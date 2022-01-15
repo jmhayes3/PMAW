@@ -15,8 +15,6 @@ from .const import API_PREFIX
 from .rate_limiter import RateLimiter
 from .request_handler import RequestHandler
 
-from pmaw import log as logger
-
 
 class Session:
     # bad_gateway, gateway_timeout, internal_server_error, service_unavailable
@@ -37,18 +35,13 @@ class Session:
     def __exit_(self, *_args):
         self._close()
 
-    @staticmethod
-    def _log_request(method, url, params):
-        logger.info(f"Request: {method} {url}; Params: {params}")
-
     def _request_with_retries(self, method, url, params, retries=3):
         response = self.rate_limiter.call(self.request_handler.request, method, url, params)
 
-        self._log_request(method, url, params)
+        print(method, url, params)
 
         if response.status_code in self.RETRY_CODES:
             if retries > 0:
-                logger.debug(f"Received {response.status_code} response. Retrying.")
                 self._request_with_retries(method, url, params, retries=retries-1)
         elif response.status_code == codes.ok:
             return response
