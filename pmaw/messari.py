@@ -11,20 +11,21 @@ from .exceptions import TooManyRequests
 
 
 class Messari:
+    """Interface for interacting with the Messari API."""
 
     def __init__(self, session=None, max_wait=60):
         self._session = session
-        self._max_wait = max_wait
 
         if self._session is None:
-            self._initialize_session()
+            self._session = self._initialize_session()
+
+        self.max_wait = max_wait
 
         self.parser = Parser(self)
-
         self.assets = Assets(self)
 
     def _initialize_session(self):
-        self._session = Session()
+        return Session()
 
     def request(self, method, path, params=None):
         tries = 3
@@ -34,8 +35,8 @@ class Messari:
             except TooManyRequests as exception:
                 if exception.retry_after:
                     wait = float(exception.retry_after) + 1
-                    if wait > self._max_wait:
-                        continue
+                    if wait > self.max_wait:
+                        break
                     else:
                         time.sleep(wait)
             finally:

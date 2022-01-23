@@ -4,22 +4,6 @@ from ..listing import ListingGenerator
 
 
 class News(PMAWBase):
-    """Asset news."""
-
-    def __init__(self, asset):
-        super().__init__(asset._messari, _data=None)
-
-        self.asset = asset
-
-    def __call__(self, **generator_kwargs):
-        return ListingGenerator(
-            self._messari,
-            API_PATH["asset_news"].format(asset=self.asset.id),
-            **generator_kwargs
-        )
-
-
-class NewsItem(PMAWBase):
     """News item."""
 
     @classmethod

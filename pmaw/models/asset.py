@@ -1,40 +1,53 @@
 from .base import MessariBase
 from .metrics import Metrics
 from .profile import Profile
-from .news import News
 from ..endpoints import API_PATH
-from ..timeseries import AssetTimeseries
+from ..timeseries import TimeseriesGenerator
+from ..listing import ListingGenerator
+from ..cache import cachedproperty, cached_property
 
 
 class Asset(MessariBase):
 
     def __init__(self, messari, id=None, _data=None, _fetched=False):
         if (id, _data).count(None) != 1:
-            raise TypeError("Either `id` or `_data` required.")
+            raise ValueError("Either `id` or `_data` required.")
 
         if id:
             self.id = id
 
         super().__init__(messari, _data=_data, _fetched=_fetched)
 
-        self.metrics = Metrics(self, None)
-        self.profile = Profile(self, None)
-        self.news = News(self)
-        self.timeseries = AssetTimeseries(self)
-
-    def __setattr__(self, attribute, value):
-        super().__setattr__(attribute, value)
-
-    def _fetch_data(self):
-        return self._messari.request("GET", self._path, params=None)
-
     def _fetch(self):
-        data = self._fetch_data().json()["data"]
+        data = self._messari.request("GET", self._path).json()["data"]
         asset = type(self)(self._messari, _data=data)
 
         self.__dict__.update(asset.__dict__)
 
         self._fetched = True
+
+    @cached_property
+    def metrics(self):
+        return Metrics(self)
+
+    @cached_property
+    def profile(self):
+        return Profile(self)
+
+    def timeseries(self, metric, start, end, interval="1d", limit=None):
+        path = API_PATH["asset_metric_time_series"].format(
+            asset=self.id,
+            metric=metric,
+        )
+        params = dict(start=start, end=end, interval=interval)
+        return TimeseriesGenerator(self._messari, path, params, limit)
+
+    def news(self, **generator_kwargs):
+        return ListingGenerator(
+            self._messari,
+            API_PATH["asset_news"].format(asset=self.id),
+            **generator_kwargs
+        )
 
     @property
     def _path(self):

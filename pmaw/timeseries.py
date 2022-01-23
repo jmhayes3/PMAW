@@ -9,23 +9,6 @@ def format_timestamp(timestamp):
     return timestamp.rstrip("Z")
 
 
-class AssetTimeseries(PMAWBase):
-    """Asset time series helper."""
-
-    def __init__(self, asset):
-        super().__init__(asset._messari, _data=None)
-
-        self.asset = asset
-
-    def __call__(self, metric, start, end, interval="1d", limit=None):
-        path = API_PATH["asset_metric_time_series"].format(
-            asset=self.asset.id,
-            metric=metric
-        )
-        params = dict(start=start, end=end, interval=interval)
-        return TimeseriesGenerator(self._messari, path, params, limit)
-
-
 class TimeseriesGenerator(PMAWBase):
     """Time series generator."""
 
@@ -59,7 +42,7 @@ class TimeseriesGenerator(PMAWBase):
         print(f"Start: {start}")
         print(f"End: {end}")
 
-        # add `interval` to start if not first batch since `end` is inclusive
+        # dates are inclusive, increment by `interval` if not the first batch
         if offset:
             start = start + timedelta(seconds=self.interval_seconds)
             print(f"Start w/ offset: {start}")
@@ -71,10 +54,6 @@ class TimeseriesGenerator(PMAWBase):
         print(f"Batch end: {end}")
 
         return start, end
-
-    def fetch_batch(self):
-        response = self._messari.request("GET", self.path, self.params)
-        return response.json()["data"]["values"]
 
     def __init__(self, messari, path, params, limit=None):
         super().__init__(messari, _data=None)
@@ -113,8 +92,15 @@ class TimeseriesGenerator(PMAWBase):
             if self.exhausted:
                 raise StopIteration
 
-            self.batch = self.fetch_batch()
-            if not self.batch or not isinstance(self.batch, list):
+            batch = self._messari.request(
+                "GET",
+                self.path,
+                self.params
+            ).json()["data"]["values"]
+
+            if batch and isinstance(batch, list):
+                self.batch = batch
+            else:
                 raise StopIteration
 
             start, end = self.get_batch_interval(
@@ -122,6 +108,7 @@ class TimeseriesGenerator(PMAWBase):
                 self.end,
                 offset=True
             )
+
             if start >= end:
                 self.exhausted = True
 
