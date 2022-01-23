@@ -1,4 +1,4 @@
-from .models.news import NewsItem
+from .models.news import News
 from .models.profile import General
 from .models.metrics import MarketData
 from .models.market import Market
@@ -19,7 +19,7 @@ class Parser:
             return Market.from_data(self._messari, data)
 
         if {"id", "title", "content", "author"}.issubset(data):
-            return NewsItem.from_data(self._messari, data)
+            return News.from_data(self._messari, data)
 
         if {"price_usd"}.issubset(data):
             return MarketData.from_data(self._messari, data)

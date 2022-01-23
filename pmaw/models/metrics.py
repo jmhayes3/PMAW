@@ -27,17 +27,13 @@ class Metrics(MessariBase):
             value = MiscData.from_data(self._messari, value)
         super().__setattr__(attribute, value)
 
-    def _fetch_data(self):
+    def _fetch(self):
         path = API_PATH["asset_metrics"].format(asset=self.asset.id)
         params = {}
-        return self._messari.request("GET", path, params)
-
-    def _fetch(self):
-        data = self._fetch_data().json()["data"]
+        data = self._messari.request("GET", path, params).json()["data"]
         metrics = type(self)(self.asset, _data=data)
 
         self.__dict__.update(metrics.__dict__)
-
         self._fetched = True
 
 

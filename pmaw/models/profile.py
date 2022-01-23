@@ -31,23 +31,16 @@ class Profile(MessariBase):
             value = Governance.from_data(self._messari, value)
         super().__setattr__(attribute, value)
 
-    def _fetch_data(self):
+    def _fetch(self):
         path = API_PATH["asset_profile"].format(asset=self.asset.id)
         params = {}
-        # params = {
-        #     "as-markdown": "",
-        # }
-        return self._messari.request("GET", path, params)
-
-    def _fetch(self):
-        data = self._fetch_data().json()["data"]
+        data = self._messari.request("GET", path, params).json()["data"]
+        data = data.pop("profile") if "profile" in data else data
         profile = type(self)(self.asset, _data=data)
 
-        # profile data is double nested
-        for attribute, value in profile.profile.items():
-            setattr(self, attribute, value)
-
+        self.__dict__.update(profile.__dict__)
         self._fetched = True
+
 
 
 class General(PMAWBase):

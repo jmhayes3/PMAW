@@ -2,18 +2,6 @@ import time
 import random
 
 from collections import OrderedDict
-from collections.abc import MutableMapping
-
-
-def flatten(data, parent="", sep="_"):
-    items = []
-    for k, v in data.items():
-        new_key = parent + sep + k if parent else k
-        if isinstance(v, MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
 
 
 class BoundedSet:
@@ -63,46 +51,3 @@ class ExponentialCounter:
     def reset(self):
         """Reset the counter to 1."""
         self._base = 1
-
-
-def stream_generator(function, pause_after=None, skip_existing=False, exclude_before=False, **function_kwargs):
-    before_attribute = None
-    exponential_counter = ExponentialCounter(max_counter=16)
-    seen_attributes = BoundedSet(301)
-    without_before_counter = 0
-    responses_without_new = 0
-    valid_pause_after = pause_after is not None
-
-    while True:
-        found = False
-        newest_attribute = None
-        limit = 100
-        if before_attribute is None:
-            limit -= without_before_counter
-            without_before_counter = (without_before_counter + 1) % 30
-        if not exclude_before:
-            function_kwargs["params"] = {"before": before_attribute}
-        for item in reversed(list(function(limit=limit, **function_kwargs))):
-            attribute = getattr(item, "slug")
-            if attribute in seen_attributes:
-                continue
-            found = True
-            seen_attributes.add(attribute)
-            newest_attribute = attribute
-            if not skip_existing:
-                yield item
-        before_attribute = newest_attribute
-        skip_existing = False
-        if valid_pause_after and pause_after < 0:
-            yield None
-        elif found:
-            exponential_counter.reset()
-            responses_without_new = 0
-        else:
-            responses_without_new += 1
-            if valid_pause_after and responses_without_new > pause_after:
-                exponential_counter.reset()
-                responses_without_new = 0
-                yield None
-            else:
-                time.sleep(exponential_counter.counter())
