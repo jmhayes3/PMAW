@@ -48,3 +48,20 @@ class MessariBase(PMAWBase):
             if attribute in self.__dict__:
                 del self.__dict__[attribute]
         self._fetched = False
+
+
+class PMAWList(PMAWBase):
+
+    def __init__(self, messari, items, _data=None):
+        super().__init__(messari, _data=_data)
+
+        self.items = items or []
+
+    def __getitem__(self, index):
+        return self.items[index]
+
+    def __iter__(self):
+        return iter(self.items)
+
+    def __len__(self):
+        return len(self.items)
