@@ -1,4 +1,4 @@
-from .base import MessariBase, PMAWBase
+from .base import MessariBase, PMAWBase, PMAWList
 from ..endpoints import API_PATH
 
 from . import asset
@@ -54,9 +54,8 @@ class General(PMAWBase):
             )
 
         if "roadmap" in data and isinstance(data["roadmap"], list):
-            roadmap = data.pop("roadmap")
-            roadmap_list = [RoadmapItem(messari, item) for item in roadmap]
-            data["roadmap"] = Roadmap(messari, roadmap_list)
+            items = [item for item in data.pop("roadmap")]
+            data["roadmap"] = Roadmap(messari, items)
 
         if "background" in data:
             data["background"] = Background(
@@ -75,26 +74,8 @@ class Overview(PMAWBase):
     """Profile overview."""
 
 
-class Roadmap(PMAWBase):
+class Roadmap(PMAWList):
     """Profile roadmap."""
-
-    def __init__(self, messari, items, _data=None):
-        super().__init__(messari, _data=_data)
-
-        self.items = items or []
-
-    def __getitem__(self, index):
-        return self.items[index]
-
-    def __iter__(self):
-        return iter(self.items)
-
-    def __len__(self):
-        return len(self.items)
-
-
-class RoadmapItem(PMAWBase):
-    """Roadmap item."""
 
 
 class Background(PMAWBase):
