@@ -1,5 +1,3 @@
-import time
-
 from .models.asset import Asset
 from .models.assets import Assets
 from .models.market import Market

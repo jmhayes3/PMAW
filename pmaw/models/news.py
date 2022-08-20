@@ -1,4 +1,4 @@
-from .base import PMAWBase
+from .base import PMAWBase, PMAWList
 from ..endpoints import API_PATH
 from ..listing import ListingGenerator
 
@@ -9,12 +9,8 @@ class News(PMAWBase):
     @classmethod
     def from_data(cls, messari, data):
         if "references" in data:
-            references = []
-            for item in data.pop("references"):
-                references.append(
-                    Reference(messari, _data=item)
-                )
-            data["references"] = references
+            references = [item for item in data.pop("references")]
+            data["references"] = References(messari, references)
 
         if "author" in data:
             author = Author(messari, _data=data.pop("author"))
@@ -23,8 +19,8 @@ class News(PMAWBase):
         return cls(messari, _data=data)
 
 
-class Reference(PMAWBase):
-    """Reference data."""
+class References(PMAWList):
+    """Reference list."""
 
 
 class Author(PMAWBase):

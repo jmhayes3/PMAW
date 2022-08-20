@@ -4,7 +4,7 @@ from .profile import Profile
 from ..endpoints import API_PATH
 from ..timeseries import TimeseriesGenerator
 from ..listing import ListingGenerator
-from ..cache import cachedproperty, cached_property
+from ..cache import cached_property
 
 
 class Asset(MessariBase):

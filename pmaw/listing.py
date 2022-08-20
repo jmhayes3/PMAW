@@ -6,7 +6,7 @@ from .exceptions import NotFound
 
 class ListingGenerator(PMAWBase):
 
-    def __init__(self, messari, path, limit=500, params=None):
+    def __init__(self, messari, path, limit=20, params=None):
         super().__init__(messari, _data=None)
 
         self.exhausted = False
@@ -21,7 +21,7 @@ class ListingGenerator(PMAWBase):
         if params:
             self.params = deepcopy(params)
 
-        self.params["limit"] = limit or 500
+        self.params["limit"] = limit or 20
         self.params["page"] = 1
 
     def __iter__(self):

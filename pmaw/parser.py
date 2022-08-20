@@ -12,13 +12,13 @@ class Parser:
         self._messari = messari
 
     def from_dict(self, data):
-        if {"id", "slug", "symbol", "name"}.issubset(data):
+        if {"slug", "symbol", "name"}.issubset(data):
             return asset.Asset.from_data(self._messari, data)
 
-        if {"id", "exchange_slug", "pair"}.issubset(data):
+        if {"exchange_slug", "pair"}.issubset(data):
             return Market.from_data(self._messari, data)
 
-        if {"id", "title", "content", "author"}.issubset(data):
+        if {"title", "content", "author"}.issubset(data):
             return News.from_data(self._messari, data)
 
         if {"price_usd"}.issubset(data):

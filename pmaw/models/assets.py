@@ -10,27 +10,59 @@ class Assets(PMAWBase):
         super().__init__(messari, _data=_data)
 
     def all(self, with_metrics=False, with_profiles=False, **generator_kwargs):
-        """Sort assets by id asc. Useful for stable sort."""
         generator_kwargs.setdefault("params", {})
+
         self._safely_add_arguments(generator_kwargs, "params", sort="id")
+
         if with_metrics:
-            self._safely_add_argument(generator_kwargs, "params", "with-metrics", "")
+            self._safely_add_argument(
+                generator_kwargs,
+                "params",
+                "with-metrics",
+                ""
+            )
+
         if with_profiles:
-            self._safely_add_argument(generator_kwargs, "params", "with-profiles", "")
-        return ListingGenerator(self._messari, API_PATH["assets"], **generator_kwargs)
+            self._safely_add_argument(
+                generator_kwargs,
+                "params",
+                "with-profiles",
+                ""
+            )
+
+        return ListingGenerator(
+            self._messari,
+            API_PATH["assets"],
+            **generator_kwargs
+        )
 
     def top(self, with_metrics=False, with_profiles=False, **generator_kwargs):
-        """Sort assets by marketcap desc (default)."""
         generator_kwargs.setdefault("params", {})
+
         if with_metrics:
-            self._safely_add_argument(generator_kwargs, "params", "with-metrics", "")
+            self._safely_add_argument(
+                generator_kwargs,
+                "params",
+                "with-metrics",
+                ""
+            )
+
         if with_profiles:
-            self._safely_add_argument(generator_kwargs, "params", "with-profiles", "")
-        return ListingGenerator(self._messari, API_PATH["assets"], **generator_kwargs)
+            self._safely_add_argument(
+                generator_kwargs,
+                "params",
+                "with-profiles",
+                ""
+            )
+
+        return ListingGenerator(
+            self._messari,
+            API_PATH["assets"],
+            **generator_kwargs
+        )
 
     @property
     def supported_metrics(self):
-        """List of possible metrics available for an asset."""
         return self._messari.request(
             "GET",
             API_PATH["assets_supported_metrics"]
