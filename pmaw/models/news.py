@@ -9,7 +9,7 @@ class News(PMAWBase):
     @classmethod
     def from_data(cls, messari, data):
         if "references" in data:
-            references = [item for item in data.pop("references")]
+            references = [Reference(messari, item) for item in data.pop("references")]
             data["references"] = References(messari, references)
 
         if "author" in data:
@@ -17,6 +17,10 @@ class News(PMAWBase):
             data["author"] = author
 
         return cls(messari, _data=data)
+
+
+class Reference(PMAWBase):
+    """Reference."""
 
 
 class References(PMAWList):

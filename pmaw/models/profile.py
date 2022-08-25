@@ -53,14 +53,11 @@ class General(PMAWBase):
                 messari, _data=data["overview"]
             )
 
-        if "roadmap" in data and isinstance(data["roadmap"], list):
-            items = [item for item in data.pop("roadmap")]
-            data["roadmap"] = Roadmap(messari, items)
+        if "roadmap" in data:
+            data["roadmap"] = Roadmap(messari, data.pop("roadmap"))
 
         if "background" in data:
-            data["background"] = Background(
-                messari, _data=data["background"]
-            )
+            data["background"] = Background.from_data(messari, data.pop("background"))
 
         if "regulation" in data:
             data["regulation"] = Regulation(
@@ -74,12 +71,23 @@ class Overview(PMAWBase):
     """Profile overview."""
 
 
+class Link(PMAWBase):
+    """Link."""
+
+
 class Roadmap(PMAWList):
     """Profile roadmap."""
 
 
 class Background(PMAWBase):
     """Profile background."""
+
+    @classmethod
+    def from_data(cls, messari, data):
+        if "issuing_organizations" in data:
+            organizations = [Organization(messari, item) for item in data.pop("issuing_organizations")]
+            data["issuing_organizations"] = Organizations(messari, organizations)
+        return cls(messari, _data=data)
 
 
 class Regulation(PMAWBase):
@@ -89,20 +97,54 @@ class Regulation(PMAWBase):
 class Contributors(PMAWBase):
     """Profile contributors."""
 
+    @classmethod
+    def from_data(cls, messari, data):
+        if "individuals" in data:
+            individuals = [Person(messari, item) for item in data.pop("individuals")]
+            data["individuals"] = Individuals(messari, individuals)
+
+        if "organizations" in data:
+            organizations = [Organization(messari, item) for item in data.pop("organizations")]
+            data["organizations"] = Organizations(messari, organizations)
+
+        return cls(messari, _data=data)
+
 
 class Advisors(PMAWBase):
     """Profile advisors."""
+
+    @classmethod
+    def from_data(cls, messari, data):
+        if "individuals" in data:
+            individuals = [Person(messari, item) for item in data.pop("individuals")]
+            data["individuals"] = Individuals(messari, individuals)
+
+        if "organizations" in data:
+            organizations = [Organization(messari, item) for item in data.pop("organizations")]
+            data["organizations"] = Organizations(messari, organizations)
+
+        return cls(messari, _data=data)
 
 
 class Investors(PMAWBase):
     """Profile investors."""
 
+    @classmethod
+    def from_data(cls, messari, data):
+        if "individuals" in data:
+            individuals = [Person(messari, item) for item in data.pop("individuals")]
+            data["individuals"] = Individuals(messari, individuals)
+
+        if "organizations" in data:
+            organizations = [Organization(messari, item) for item in data.pop("organizations")]
+            data["organizations"] = Organizations(messari, organizations)
+
+        return cls(messari, _data=data)
+
 
 class Ecosystem(PMAWBase):
     """Profile ecosystem."""
 
-    # The asset id returned by the api here is not the same as the asset
-    # id returned by the assets/asset endpoint.
     @classmethod
     def from_data(cls, messari, data):
         if "assets" in data and isinstance(data["assets"], list):
@@ -112,6 +154,11 @@ class Ecosystem(PMAWBase):
                     asset.Asset(messari, id=item["id"])
                 )
             data["assets"] = assets
+
+        if "organizations" in data:
+            organizations = [Organization(messari, item) for item in data.pop("organizations")]
+            data["organizations"] = Organizations(messari, organizations)
+
         return cls(messari, _data=data)
 
 
@@ -125,3 +172,19 @@ class Technology(PMAWBase):
 
 class Governance(PMAWBase):
     """Profile governance."""
+
+
+class Person(PMAWBase):
+    """Person."""
+
+
+class Organization(PMAWBase):
+    """Organization."""
+
+
+class Individuals(PMAWList):
+    """Individuals."""
+
+
+class Organizations(PMAWList):
+    """Organizations."""
