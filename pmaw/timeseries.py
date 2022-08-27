@@ -39,19 +39,12 @@ class TimeseriesGenerator(PMAWBase):
         start = datetime.fromisoformat(start)
         end = datetime.fromisoformat(end)
 
-        print(f"Start: {start}")
-        print(f"End: {end}")
-
         # dates are inclusive, increment by `interval` if not the first batch
         if offset:
             start = start + timedelta(seconds=self.interval_seconds)
-            print(f"Start w/ offset: {start}")
 
         batch_end = start + timedelta(seconds=self.max_interval_seconds)
         end = min(batch_end, end)
-
-        print(f"Batch start: {start}")
-        print(f"Batch end: {end}")
 
         return start, end
 

@@ -34,8 +34,6 @@ class Session:
         self._close()
 
     def _request(self, method, url, params):
-        print(method, url, params)
-
         response = self.rate_limiter.call(
             self.request_handler.request,
             method,
