@@ -6,10 +6,11 @@
 * Lazy loading of asset data.
 
 ## Installation
+```sh
+pip install --upgrade requests  # PMAW requires the requests package. 
+```
 
 ```sh
-pip install requests
-
 pip install git+https://github.com/jmhayes3/pmaw.git@main
 ```
 
