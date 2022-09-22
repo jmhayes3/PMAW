@@ -18,11 +18,9 @@ from .request_handler import RequestHandler
 
 class Session:
 
-    def __init__(self, request_handler=None, api_prefix=None):
+    def __init__(self, request_handler=None, rate_limiter=None):
         self.request_handler = request_handler or RequestHandler()
-        self.api_prefix = api_prefix or API_PREFIX
-
-        self.rate_limiter = RateLimiter()
+        self.rate_limiter = rate_limiter or RateLimiter()
 
     def _close(self):
         self.request_handler.close()
@@ -58,6 +56,6 @@ class Session:
 
     def request(self, method, path, params=None):
         params = deepcopy(params) or {}
-        url = urljoin(self.api_prefix, path)
+        url = urljoin(API_PREFIX, path)
 
         return self._request(method, url, params)

@@ -3,13 +3,14 @@ import time
 
 class RateLimiter:
 
-    def __init__(self):
+    def __init__(self, target_rate=20):
+        self.target_rate = target_rate
+
         self.remaining = None
         self.limit = None
         self.reset_timestamp = None
         self.next_request_timestamp = None
         self.cache = list()
-        self.target_rate = 60  # requests per minute
 
     def call(self, request_function, *args, **kwargs):
         self.delay()
