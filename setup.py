@@ -18,6 +18,8 @@ with open(path.join(PATH, PACKAGE, "const.py"), encoding="utf-8") as fp:
 
 setup(
     name=PACKAGE,
+    version=VERSION,
+    license="MIT License",
     author="jmhayes3",
     author_email="22490346+jmhayes3@users.noreply.github.com",
     classifiers=[
@@ -28,7 +30,11 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", "tests.*"]),
-    license="MIT License",
-    version=VERSION,
+    install_requires=[
+        str(r)
+        for r in pkg_resources.parse_requirements(
+            open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
+        )
+    ],
     extras_require={"dev": ["pytest"]},
 )
