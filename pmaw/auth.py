@@ -7,5 +7,6 @@ class Authenticator(AuthBase):
         self.access_token = access_token
 
     def __call__(self, r):
-        r.headers['x-messari-api-key'] = self.access_token
+        if self.access_token is not None:
+            r.headers['x-messari-api-key'] = self.access_token
         return r
