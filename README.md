@@ -5,16 +5,11 @@ PMAW aims to be robust and easy to use while respecting [Messari's API rules](ht
 
 ## Installation
 ```sh
-pip install --upgrade requests  # PMAW requires the requests package.
-```
-
-```sh
-pip install git+https://github.com/jmhayes3/pmaw.git@main
+pip install git+https://github.com/jmhayes3/pmaw.git
 ```
 
 ## Quickstart
 To get started, create an instance of the ``Messari`` class:
-
 ```python
 from pmaw import Messari
 
