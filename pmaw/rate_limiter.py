@@ -27,6 +27,13 @@ class RateLimiter:
                 time.sleep(wait)
 
     def update(self, response_headers):
+        try:
+            self.remaining = int(response_headers["x-ratelimit-remaining"])
+            self.limit = int(response_headers["x-ratelimit-limit"])
+            self.reset_timestamp = int(response_headers["x-ratelimit-reset"])
+        except KeyError:
+            return
+
         now = time.time()
 
         self.cache.append(now)
@@ -38,10 +45,6 @@ class RateLimiter:
             except ValueError:
                 pass
             start = min(self.cache)
-
-        self.remaining = int(response_headers["x-ratelimit-remaining"])
-        self.limit = int(response_headers["x-ratelimit-limit"])
-        self.reset_timestamp = int(response_headers["x-ratelimit-reset"])
 
         if self.remaining <= 0:
             self.next_request_timestamp = self.reset_timestamp
