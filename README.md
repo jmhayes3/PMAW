@@ -32,9 +32,6 @@ Using the ``messari`` instance you can then interact with the API:
 for asset in messari.assets.top(limit=10):
   print(asset.name)
 
-asset = messari.asset("eth")
-vars(asset)
-
 # Markets
 for market in messari.markets(limit=5):
   print(market.exchange_name, market.pair)
