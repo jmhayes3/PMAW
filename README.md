@@ -32,6 +32,9 @@ Using the ``messari`` instance you can then interact with the API:
 for asset in messari.assets.top(limit=10):
   print(asset.name)
 
+asset = messari.asset("eth")
+vars(asset)
+
 # Markets
 for market in messari.markets(limit=5):
   print(market.exchange_name, market.pair)
@@ -42,6 +45,12 @@ for market in messari.markets(limit=5):
 news = messari.news(limit=10)
 for n in news:
   print(n.title)
+```
+
+To check which attributes are available for an object use the ``vars`` function:
+```python
+asset = messari.asset("eth")
+vars(asset)
 ```
 
 ## Rate Limits
