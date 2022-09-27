@@ -1,0 +1,71 @@
+{
+  "http_interactions": [
+    {
+      "recorded_at": "2022-09-27T05:02:33",
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "Accept": [
+            "*/*"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "User-Agent": [
+            "python-requests/2.28.1"
+          ],
+          "x-messari-api-key": [
+            "<AUTH_TOKEN>"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://data.messari.io/api/v1/assets/ethereum"
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAA/0SOvWrsMBCF32Vq6zKWrd/+Qh5gqzRiJI03Bsm7SHIRln33YFKkPIfzHb4X9EHj7OBfwIWenTP4dYKxV+6D6hM8SJRSoBPS3FB5lH5Z/qkZVzSLXj/hPUGmQdfDnq/5nIxTmxJz3LJYMS3CKsuCXTZsJSadESbo3HYq4UI0KjdB/67xUcDD/9sHTHBQ5SuML2581oso5x088F+THsdolEagnBv3zh38cZYyQdiPwe2gEgbXZ6D7o1H41dNLthFnochpsc4bCquyEui0NTHGzSSC9/snAAD//wbaVRwZAQAA",
+          "encoding": "UTF-8",
+          "string": ""
+        },
+        "headers": {
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "234"
+          ],
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "date": [
+            "Tue, 27 Sep 2022 05:02:33 GMT"
+          ],
+          "vary": [
+            "Accept-Encoding,Origin"
+          ],
+          "x-ratelimit-limit": [
+            "4000"
+          ],
+          "x-ratelimit-remaining": [
+            "3882"
+          ],
+          "x-ratelimit-reset": [
+            "1664276595"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "https://data.messari.io/api/v1/assets/ethereum"
+      }
+    }
+  ],
+  "recorded_with": "betamax/0.8.1"
+}
