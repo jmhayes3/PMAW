@@ -53,5 +53,6 @@ vars(asset)
 ## Rate Limits
 PMAW handles rate limiting automatically, eliminating the need to introduce sleep calls into code.
 
-By default, the rate limit is set to 20 requests per minute.
-Users with an account have an increased rate limit of 30 requests per minute (60 for PRO users).
+By default, the rate limit is set to 20 requests per minute (the limit enforced by the API for unauthenticated users).
+If an API key is provided, the rate limit is increased to 30 requests per minute.
+A custom rate limit can be set using the ``target_rate`` keyword argument when initializing the ``Messari`` class. 
