@@ -1,20 +1,20 @@
+import os
 import re
 import pkg_resources
 
 
 from codecs import open
-from os import path
 
 from setuptools import find_packages, setup
 
 
 PACKAGE = "pmaw"
-PATH = path.abspath(path.dirname(__file__))
+PATH = os.path.abspath(os.path.dirname(__file__))
 
-with open(path.join(PATH, "README.md"), encoding="utf-8") as fp:
+with open(os.path.join(PATH, "README.md"), encoding="utf-8") as fp:
     README = fp.read()
 
-with open(path.join(PATH, PACKAGE, "const.py"), encoding="utf-8") as fp:
+with open(os.path.join(PATH, PACKAGE, "const.py"), encoding="utf-8") as fp:
     VERSION = re.search('__version__ = "([^"]+)"', fp.read()).group(1)
 
 setup(
