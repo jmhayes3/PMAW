@@ -90,5 +90,3 @@ ENV/
 .ropeproject
 *.npy
 *.pkl
-
-*.lock
