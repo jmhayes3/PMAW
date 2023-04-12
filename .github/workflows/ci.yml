@@ -40,4 +40,4 @@ jobs:
       run: |
         pytest
       env:
-        X_MESSARI_API_KEY: "1309f8d8-eb8d-403d-b014-6ed0f4c38eae"
+        X_MESSARI_API_KEY: ${{ secrets.MESSARI_API_KEY }}
