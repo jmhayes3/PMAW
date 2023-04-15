@@ -1,5 +1,7 @@
 # Python Messari API Wrapper (PMAW)
 
+[![build](https://github.com/jmhayes3/pmaw/actions/workflows/ci.yml/badge.svg)](https://github.com/jmhayes3/pmaw/actions/workflows/ci.yml)
+
 PMAW is a Python package that allows for simple access to the [Messari](https://messari.io) API.
 PMAW aims to be robust and easy to use while respecting [Messari's API rules](https://messari.io/api/docs).
 
