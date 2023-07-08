@@ -10,7 +10,7 @@ PMAW aims to be robust and easy to use while respecting [Messari's API rules](ht
 pip install git+https://github.com/jmhayes3/pmaw.git
 ```
 
-## Quickstart
+## Usage
 To get started, create an instance of the ``Messari`` class:
 ```python
 from pmaw import Messari
